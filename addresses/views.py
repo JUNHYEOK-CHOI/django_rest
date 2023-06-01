@@ -120,17 +120,20 @@ def show_friend_list(request):
         cursor = conn.cursor()
 
         # 현재 사용자의 ID
-        user_id = request.POST.get('user_id')
+        user_id = request.POST.get('userid')
+        print(user_id)
 
         # friend 테이블에서 현재 사용자의 친구들 조회
         query = f"SELECT friend_id FROM friend WHERE id = '{user_id}'"
         cursor.execute(query)
         results = cursor.fetchall()
 
+        print(results)
+
         # 친구들의 정보 조회
         for result in results:
             friend_id = result[0]
-            query = f"SELECT name FROM friend WHERE id = '{friend_id}'"
+            query = f"SELECT name FROM user WHERE id = '{friend_id}'"
             cursor.execute(query)
             friend_info = cursor.fetchone()
 
@@ -145,6 +148,8 @@ def show_friend_list(request):
         conn.close()
 
         print(name_list)
+        print(id_list)
+        print(id_num)
 
         return JsonResponse({'code': name_list, 'code2': id_list, 'num': id_num}, status=200)
 

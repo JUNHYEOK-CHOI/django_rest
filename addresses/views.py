@@ -83,27 +83,25 @@ def app_login(request):
 def sign_up(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
-        name = request.POST.get('username', '')
         id = request.POST.get('userid', '')
         pw = request.POST.get('userpw', '')
-        print("name = " + name +"id = " + id + " pw = " + pw)
+        name = request.POST.get('username', '')
+        # 추가적인 회원 가입 정보를 가져올 수 있습니다.
 
-        result = 1
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        for i in range(0, Addresses.user_num):
-            if Addresses.user_list[i][0] == id:
-                result = 0
-                break
+        # INSERT 쿼리 실행
+        query = "INSERT INTO user (id, name, password) VALUES (%s, %s, %s)"
+        values = (id, name, pw)
+        cursor.execute(query, values)
+        conn.commit()
 
+        cursor.close()
+        conn.close()
 
-        if result:
-            Addresses.user_list.append([id, pw, name])
-            Addresses.user_num = Addresses.user_num + 1
-            print("가입 성공!")
-            return JsonResponse({'code': '0000', 'msg': '가입성공입니다.'}, status=200)
-        else:
-            print("가입 실패")
-            return JsonResponse({'code': '1001', 'msg': '가입실패입니다.'}, status=200)
+        return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
 
 @csrf_exempt
 def friend_list(request):

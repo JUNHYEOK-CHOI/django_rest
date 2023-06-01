@@ -111,7 +111,8 @@ def show_friend_list(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        name_list = []
+        name_list = [] # name 을 저장
+        id_list = [] # id를 저장
         id_num = 0
 
         # MySQL 데이터베이스 연결
@@ -134,15 +135,18 @@ def show_friend_list(request):
             friend_info = cursor.fetchone()
 
             if friend_info:
-                name = friend_info[0]
+                name = friend_info[0]  #code name / code2 id
                 name_list.append(name)
+                id_list.append(friend_id)
                 id_num += 1
 
         # 연결 종료
         cursor.close()
         conn.close()
 
-        return JsonResponse({'name_list': name_list, 'num': id_num}, status=200)
+        print(name_list)
+
+        return JsonResponse({'code': name_list, 'code2': id_list, 'num': id_num}, status=200)
 
 
 @csrf_exempt

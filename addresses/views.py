@@ -130,7 +130,7 @@ def show_friend_list(request):
         # 친구들의 정보 조회
         for result in results:
             friend_id = result[0]
-            query = f"SELECT name FROM user WHERE id = '{friend_id}'"
+            query = f"SELECT name FROM friend WHERE id = '{friend_id}'"
             cursor.execute(query)
             friend_info = cursor.fetchone()
 
@@ -315,12 +315,22 @@ def get_profile(request):
         print("리퀘스트 로그" + str(request.body))
 
         id = request.POST.get('userid', '')
-        result = 0
+        name = ""
 
-        for i in range(0, Addresses.user_num):
-            if Addresses.user_list[i][0] == id:
-                result = i
-                break
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        return JsonResponse({'name': Addresses.user_list[result][2], 'id': Addresses.user_list[result][0]}, status=200)
+        # SELECT 쿼리 실행
+        query = "SELECT name FROM user WHERE id = %s"
+        cursor.execute(query, (id,))
+        result = cursor.fetchone()
 
+        if result:
+            name = result[0]
+
+        # 연결 종료
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'name': name, 'id': id}, status=200)

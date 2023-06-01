@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -54,14 +55,32 @@ def index(request):
     return render(request, "addresses/index.html")
 
 @csrf_exempt
+def sign_up(request):
+    if request.method == 'POST':
+        print("리퀘스트 로그" + str(request.body))
+        username = request.POST.get('userid', '')
+        password = request.POST.get('userpw', '')
+        name = request.POST.get('username', '')
+
+        # 사용자 생성
+        user = User.objects.create_user(username=username, password=password)
+
+        # 추가 필드 설정
+        user.first_name = name
+        # 추가적인 회원 가입 정보 설정 가능
+
+        user.save()
+
+        return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
+
+@csrf_exempt
 def app_login(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
-        id = request.POST.get('userid', '')
-        pw = request.POST.get('userpw', '')
-        print("id = " + id + " pw = " + pw )
+        username = request.POST.get('userid', '')
+        password = request.POST.get('userpw', '')
 
-        user = authenticate(username=id, password=pw)
+        user = authenticate(request, username=username, password=password)
 
         if user is not None:
             # 사용자 인증 성공
@@ -71,31 +90,6 @@ def app_login(request):
             # 사용자 인증 실패
             print("로그인 실패")
             return JsonResponse({'code': '1001', 'msg': '로그인 실패입니다.'}, status=200)
-
-
-@csrf_exempt
-def sign_up(request):
-    if request.method == 'POST':
-        print("리퀘스트 로그" + str(request.body))
-        id = request.POST.get('userid', '')
-        pw = request.POST.get('userpw', '')
-        name = request.POST.get('username', '')
-        # 추가적인 회원 가입 정보를 가져올 수 있습니다.
-
-        # MySQL 데이터베이스 연결
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-
-        # INSERT 쿼리 실행
-        query = "INSERT INTO user (id, name, password) VALUES (%s, %s, %s)"
-        values = (id, name, pw)
-        cursor.execute(query, values)
-        conn.commit()
-
-        cursor.close()
-        conn.close()
-
-        return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
 
 @csrf_exempt
 def friend_list(request):

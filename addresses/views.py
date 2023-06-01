@@ -55,59 +55,94 @@ def index(request):
     return render(request, "addresses/index.html")
 
 @csrf_exempt
-def sign_up(request):
-    if request.method == 'POST':
-        print("리퀘스트 로그" + str(request.body))
-        username = request.POST.get('userid', '')
-        password = request.POST.get('userpw', '')
-        name = request.POST.get('username', '')
-
-        # 사용자 생성
-        user = User.objects.create_user(username=username, password=password)
-
-        # 추가 필드 설정
-        user.first_name = name
-        # 추가적인 회원 가입 정보 설정 가능
-
-        user.save()
-
-        return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
-
-@csrf_exempt
 def app_login(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
-        username = request.POST.get('userid', '')
-        password = request.POST.get('userpw', '')
+        id = request.POST.get('userid', '')
+        pw = request.POST.get('userpw', '')
+        print("id = " + id + " pw = " + pw)
 
-        user = authenticate(request, username=username, password=password)
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        if user is not None:
-            # 사용자 인증 성공
+        # MySQL에서 사용자 조회
+        query = "SELECT id, name, password FROM user WHERE id = %s AND password = %s"
+        values = (id, pw)
+        cursor.execute(query, values)
+        user_data = cursor.fetchone()  # 사용자 정보 조회
+
+        # 사용자 인증 성공
+        if user_data:
             print("로그인 성공!")
             return JsonResponse({'code': '0000', 'msg': '로그인 성공입니다.'}, status=200)
+        # 사용자 인증 실패
         else:
-            # 사용자 인증 실패
             print("로그인 실패")
             return JsonResponse({'code': '1001', 'msg': '로그인 실패입니다.'}, status=200)
 
 @csrf_exempt
-def friend_list(request):
+def sign_up(request):
+    if request.method == 'POST':
+        id = request.POST.get('userid', '')
+        pw = request.POST.get('userpw', '')
+        name = request.POST.get('username', '')
+        # 추가적인 회원 가입 정보를 가져올 수 있습니다.
+
+        # user = authenticate(request, username=username, password=password)
+
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+
+        # INSERT 쿼리 실행
+        query = "INSERT INTO user (id, name, password) VALUES (%s, %s, %s)"
+        values = (id, name, pw)
+        cursor.execute(query, values)
+        conn.commit()
+
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
+
+@csrf_exempt
+def show_friend_list(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        id_list = []
-        id_list2 = []
+        name_list = []
         id_num = 0
-        for i in range(0, Addresses.friend_num):
-            for j in range(0, Addresses.user_num):
-                if Addresses.friend_list[i] == Addresses.user_list[j][0]:
-                    id_list.append(Addresses.user_list[j][2])
-                    id_list2.append(Addresses.user_list[j][0])
-                    id_num = id_num + 1
 
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        return JsonResponse({'code': id_list, 'code2': id_list2, 'num': id_num}, status=200)
+        # 현재 사용자의 ID
+        user_id = request.POST.get('user_id')
+
+        # friend 테이블에서 현재 사용자의 친구들 조회
+        query = f"SELECT friend_id FROM friend WHERE id = '{user_id}'"
+        cursor.execute(query)
+        results = cursor.fetchall()
+
+        # 친구들의 정보 조회
+        for result in results:
+            friend_id = result[0]
+            query = f"SELECT name FROM user WHERE id = '{friend_id}'"
+            cursor.execute(query)
+            friend_info = cursor.fetchone()
+
+            if friend_info:
+                name = friend_info[0]
+                name_list.append(name)
+                id_num += 1
+
+        # 연결 종료
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'name_list': name_list, 'num': id_num}, status=200)
 
 
 @csrf_exempt
@@ -116,36 +151,62 @@ def user_list(request):
         print("리퀘스트 로그" + str(request.body))
 
         id_list = []
-        id_list2 = []
+        name_list = []
         id_num = 0
         id = request.POST.get('userid', '')
 
-        for i in range(0, Addresses.user_num):
-            if Addresses.user_list[i][0] == id:
-                id_list.append(Addresses.user_list[i][0])
-                id_list2.append(Addresses.user_list[i][2])
-                id_num = id_num + 1
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        return JsonResponse({'code': id_list, 'code2': id_list2, 'num': id_num}, status=200)
+        # SELECT 쿼리 실행
+        query = "SELECT u.id, u.name FROM user u WHERE u.id = %s"
+        cursor.execute(query, (id,))
+
+        # 결과 가져오기
+        results = cursor.fetchall()
+
+        # 결과 처리
+        for row in results:
+            id_list.append(row[0])
+            name_list.append(row[1])
+            id_num += 1
+
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'code': id_list, 'code2': name_list, 'num': id_num}, status=200)
 
 @csrf_exempt
-def friend_list_add(request):
+def friend_add(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        FLAG = 0
         id = request.POST.get('userid', '')
+        friend_id = request.POST.get('friendid', '')
 
-        for i in range(0, Addresses.friend_num):
-            if Addresses.friend_list[i] == id:
-                FLAG = 1
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        if(FLAG == 0):
-            Addresses.friend_list.append(id)
-            Addresses.friend_num = Addresses.friend_num + 1
-            return JsonResponse({'code': '0000', 'msg': '추가 성공입니다.'}, status=200)
+        # 사용자 ID가 존재하는지 확인
+        query = f"SELECT id FROM user WHERE id = '{id}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+
+        print(id+"   "+friend_id)
+
+        if result:
+            # 친구 목록에 사용자 ID 추가
+            query = f"INSERT INTO friend (id, friend_id) VALUES ('{id}', '{friend_id}')"
+            cursor.execute(query)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return JsonResponse({'code': '0000', 'msg': '친구 추가 성공입니다.'}, status=200)
         else:
-            return JsonResponse({'code': '1001', 'msg': '추가 실패입니다.'}, status=200)
+            cursor.close()
+            conn.close()
+            return JsonResponse({'code': '1001', 'msg': '친구 추가 실패입니다.'}, status=200)
 
 
 @csrf_exempt
@@ -215,24 +276,34 @@ def period_check(request):
         return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
 
 @csrf_exempt
-def friend_list_delete(request):
+def friend_delete(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
         id = request.POST.get('userid', '')
+        friend_id = request.POST.get('friendid', '')
 
-        for i in range(0, Addresses.friend_num):
-            if Addresses.friend_list[i] == id:
-                Addresses.friend_list.remove(id)
-                Addresses.friend_num = Addresses.friend_num - 1
-                result = 1
-                break
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+
+        # 사용자 ID가 존재하는지 확인
+        query = f"SELECT id, friend_id FROM friend WHERE id = '{id}' AND friend_id = '{friend_id}'"
+        cursor.execute(query)
+        result = cursor.fetchone()
+
         if result:
-            print("삭제 성공!")
-            return JsonResponse({'code': '0000', 'msg': '삭제성공입니다.'}, status=200)
+            # 친구 목록에서 사용자 ID 삭제
+            query = f"DELETE FROM friend WHERE id = '{id}' AND friend_id = '{friend_id}'"
+            cursor.execute(query)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return JsonResponse({'code': '0000', 'msg': '친구 삭제 성공입니다.'}, status=200)
         else:
-            print("삭제 실패")
-            return JsonResponse({'code': '1001', 'msg': '삭제실패입니다.'}, status=200)
+            cursor.close()
+            conn.close()
+            return JsonResponse({'code': '1001', 'msg': '친구 삭제 실패입니다.'}, status=200)
 
 @csrf_exempt
 def get_profile(request):

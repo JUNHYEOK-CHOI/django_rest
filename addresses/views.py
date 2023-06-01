@@ -55,28 +55,22 @@ def index(request):
 
 @csrf_exempt
 def app_login(request):
-
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
         id = request.POST.get('userid', '')
         pw = request.POST.get('userpw', '')
-        print("id = " + id + " pw = " + pw)
+        print("id = " + id + " pw = " + pw )
 
+        user = authenticate(username=id, password=pw)
 
-        for i in range(0, Addresses.user_num):
-            if Addresses.user_list[i][0] == id and Addresses.user_list[i][1] == pw:
-                result = 1
-                break
-            else:
-                result = 0
-
-
-        if result:
+        if user is not None:
+            # 사용자 인증 성공
             print("로그인 성공!")
-            return JsonResponse({'code': '0000', 'msg': '로그인성공입니다.'}, status=200)
+            return JsonResponse({'code': '0000', 'msg': '로그인 성공입니다.'}, status=200)
         else:
-            print("실패")
-            return JsonResponse({'code': '1001', 'msg': '로그인실패입니다.'}, status=200)
+            # 사용자 인증 실패
+            print("로그인 실패")
+            return JsonResponse({'code': '1001', 'msg': '로그인 실패입니다.'}, status=200)
 
 
 @csrf_exempt

@@ -54,7 +54,6 @@ yy = []
 def index(request):
     return render(request, "addresses/index.html")
 
-
 @csrf_exempt
 def app_login(request):
     if request.method == 'POST':
@@ -76,16 +75,11 @@ def app_login(request):
         # 사용자 인증 성공
         if user_data:
             print("로그인 성공!")
-            update_query = "UPDATE user SET alive = 'Y' WHERE id = %s"
-            update_values = (id,)
-            cursor.execute(update_query, update_values)
-            conn.commit()
             return JsonResponse({'code': '0000', 'msg': '로그인 성공입니다.'}, status=200)
         # 사용자 인증 실패
         else:
             print("로그인 실패")
             return JsonResponse({'code': '1001', 'msg': '로그인 실패입니다.'}, status=200)
-
 
 @csrf_exempt
 def sign_up(request):
@@ -112,14 +106,13 @@ def sign_up(request):
 
         return JsonResponse({'code': '0000', 'msg': '회원 가입 성공입니다.'}, status=200)
 
-
 @csrf_exempt
 def show_friend_list(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        name_list = []  # name 을 저장
-        id_list = []  # id를 저장
+        name_list = [] # name 을 저장
+        id_list = [] # id를 저장
         id_num = 0
 
         # MySQL 데이터베이스 연결
@@ -145,7 +138,7 @@ def show_friend_list(request):
             friend_info = cursor.fetchone()
 
             if friend_info:
-                name = friend_info[0]  # code name / code2 id
+                name = friend_info[0]  #code name / code2 id
                 name_list.append(name)
                 id_list.append(friend_id)
                 id_num += 1
@@ -192,7 +185,6 @@ def user_list(request):
 
         return JsonResponse({'code': id_list, 'code2': name_list, 'num': id_num}, status=200)
 
-
 @csrf_exempt
 def friend_add(request):
     if request.method == 'POST':
@@ -210,7 +202,7 @@ def friend_add(request):
         cursor.execute(query)
         result = cursor.fetchone()
 
-        print(id + "   " + friend_id)
+        print(id+"   "+friend_id)
 
         if result:
             # 친구 목록에 사용자 ID 추가
@@ -227,78 +219,18 @@ def friend_add(request):
 
 
 @csrf_exempt
-def history_list(request):  # 예전의 기록들
+def history_list(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        name_list = []  # name 을 저장
-        id_list = []  # id를 저장
-        id_num = 0
-
-        # MySQL 데이터베이스 연결
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-
-        # 현재 사용자의 ID
-        user_id = request.POST.get('userid')
-        print(user_id)
-
-        # friend 테이블에서 현재 사용자의 친구들 조회
-        query = f"SELECT friend_id FROM friend WHERE id = '{user_id}'"
-        cursor.execute(query)
-        results = cursor.fetchall()
-
-        print(results)
-
-        # 친구들의 정보 조회
-        for result in results:
-            friend_id = result[0]
-            query = f"SELECT name FROM user WHERE id = '{friend_id}'"
-            cursor.execute(query)
-            friend_info = cursor.fetchone()
-
-            if friend_info:
-                name = friend_info[0]  # code name / code2 id
-                name_list.append(name)
-                id_list.append(friend_id)
-                id_num += 1
-
-        # 연결 종료
-        cursor.close()
-        conn.close()
-
-        print(name_list)
-        print(id_list)
-        print(id_num)
-
-        return JsonResponse({'code': name_list, 'code2': id_list, 'num': id_num}, status=200)
-
+        return JsonResponse({'code': Addresses.history_friend, 'num': Addresses.history_num}, status=200)
 
 @csrf_exempt
-def history_list2(request):  # 각 친구별 여행 목록
+def history_list2(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        # MySQL 데이터베이스 연결
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-
-        id = request.POST.get('userid', '')  # 사용자 ID
-
-        # MySQL에서 사용자의 유일한 레코드 이름 조회
-        query = "SELECT DISTINCT record_name FROM user_history WHERE id = %s"
-        values = (id,)
-        cursor.execute(query, values)
-        records = cursor.fetchall()  # 사용자의 레코드 목록 조회
-
-        # 유일한 레코드 이름 개수
-        num_records = len(records)
-
-        # 레코드 출력
-        record_names = [record[0] for record in records]
-        print("레코드 목록:", record_names)
-
-        return JsonResponse({'code': id, 'num': num_records, 'records': record_names}, status=200)
+        return JsonResponse({'code': Addresses.history_friend2, 'num': Addresses.history_num2}, status=200)
 
 
 @csrf_exempt
@@ -306,29 +238,7 @@ def history_list3(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        id = request.POST.get('userid', '')  # 사용자 ID
-        record_name = request.POST.get('recordname', '')  # 사용자 record 정보
-
-        # MySQL 데이터베이스 연결
-        conn = mysql.connector.connect(**config)
-        cursor = conn.cursor()
-
-        # MySQL에서 사용자의 이름 조회
-        name_query = "SELECT name FROM user WHERE id = %s"
-        name_values = (id,)
-        cursor.execute(name_query, name_values)
-        name = cursor.fetchone()[0]  # 사용자 이름 조회
-
-        # MySQL에서 record_name에 해당하는 longitude와 latitude 조회
-        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s"
-        history_values = (record_name,)
-        cursor.execute(history_query, history_values)
-        history_data = cursor.fetchall()  # record_name에 해당하는 longitude와 latitude 조회
-
-        # longitude와 latitude를 배열로 변환
-        longitude_latitude = [{'longitude': row[0], 'latitude': row[1]} for row in history_data]
-
-        return JsonResponse({'code': name, 'msg': longitude_latitude}, status=200)
+        return JsonResponse({'code': Addresses.history_friend3, 'msg': Addresses.history_num3}, status=200)
 
 
 @csrf_exempt
@@ -343,6 +253,7 @@ def history_RT(request):
             if Addresses.user_list[i][0] == user_id:
                 user_name = Addresses.user_list[i][2]
                 break
+
 
         return JsonResponse({'code': user_name, 'msg': Addresses.history_RT_num}, status=200)
 
@@ -360,6 +271,18 @@ def period_check(request):
 
         return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
 
+@csrf_exempt
+def period_check(request):
+    if request.method == 'POST':
+        print("리퀘스트 로그" + str(request.body))
+
+        period = request.POST.get('period', '')
+        check = request.POST.get('check', '')
+
+        Addresses.checkList = check
+        Addresses.period = period
+
+        return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
 
 @csrf_exempt
 def friend_delete(request):
@@ -390,7 +313,6 @@ def friend_delete(request):
             cursor.close()
             conn.close()
             return JsonResponse({'code': '1001', 'msg': '친구 삭제 실패입니다.'}, status=200)
-
 
 @csrf_exempt
 def get_profile(request):

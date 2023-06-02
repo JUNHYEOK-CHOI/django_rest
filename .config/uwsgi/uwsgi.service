@@ -3,8 +3,9 @@ Description=uWSGI service
 After=syslog.target
 
 [Service]
-ExecStart=/home/ec2-user/myvenv/bin/uwsgi -i /srv/django_rest/.config/uwsgi/restfulserver.ini
+ExecStart=/home/ec2-user/myvenv/bin/uwsgi -ini /srv/django_rest/.config/uwsgi/restfulserver.ini
 
+RuntimeDirectory=uwsgi
 Restart=always
 KillSignal=SIGQUIT
 Type=notify

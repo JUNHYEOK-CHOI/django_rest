@@ -352,13 +352,24 @@ def period_check(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        period = request.POST.get('period', '')
-        check = request.POST.get('check', '')
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        Addresses.checkList = check
-        Addresses.period = period
+        id = request.POST.get('id', '')
+        longitude = request.POST.get('period', '')
+        latitude = request.POST.get('check', '')
 
-        return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
+        # Insert the location data into the user_history table
+        query = "INSERT INTO user_history (id, longitude, latitude) VALUES (%s, %s, %s)"
+        values = (id, longitude, latitude)
+        cursor.execute(query, values)
+
+        # Commit the changes and close the connection
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return JsonResponse({'code': '0000', 'num': '성공입니다.'}, status=200)
 
 
 @csrf_exempt

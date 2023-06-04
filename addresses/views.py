@@ -283,11 +283,11 @@ def history_list2(request):  # 각 친구별 여행 목록
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
 
-        id = request.POST.get('userid', '')  # 사용자 ID
+        user_id = request.POST.get('userid', '')  # 사용자 ID
 
         # MySQL에서 사용자의 유일한 레코드 이름 조회
-        query = "SELECT DISTINCT record_name FROM user_history WHERE id = %s"
-        values = (id,)
+        query = "SELECT DISTINCT record_name FROM user_history WHERE id IN (SELECT allow_fid FROM allow_friend WHERE allow_fid = %s)"
+        values = (user_id,)
         cursor.execute(query, values)
         records = cursor.fetchall()  # 사용자의 레코드 목록 조회
 
@@ -298,7 +298,7 @@ def history_list2(request):  # 각 친구별 여행 목록
         record_names = [record[0] for record in records]
         print("레코드 목록:", record_names)
 
-        return JsonResponse({'code': id, 'num': num_records, 'records': record_names}, status=200)
+        return JsonResponse({'code': user_id, 'num': num_records, 'records': record_names}, status=200)
 
 
 @csrf_exempt

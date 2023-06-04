@@ -374,7 +374,7 @@ def history_RT(request):
         print(longitude_list)
         print(latitude_list)
 
-        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': record_time},
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list},
                             status=200)
 
 

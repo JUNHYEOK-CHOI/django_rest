@@ -388,8 +388,8 @@ def period_check2(request):
         cursor = conn.cursor()
 
         id = request.POST.get('id', '')
-        longitude = request.POST.get('period', '')
-        latitude = request.POST.get('check', '')
+        longitude = request.POST.get('longitude', '')
+        latitude = request.POST.get('latitude', '')
         record_name = request.POST.get('recordname', '')
         period = request.POST.get('period', '')
 

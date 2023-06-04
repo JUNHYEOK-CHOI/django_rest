@@ -357,7 +357,6 @@ def history_RT(request):
 
         # MySQL에서 record_name에 해당하는 longitude, latitude, time 조회
         history_query = "SELECT longitude, latitude, time FROM user_history WHERE record_name = %s AND alive = 'Y' ORDER BY history_id ASC LIMIT 1"
-        cursor.execute(history_query)
         longitude_latitude_time = cursor.fetchone()  # record_name에 해당하는 longitude, latitude, time 조회
 
         longitude_list = []

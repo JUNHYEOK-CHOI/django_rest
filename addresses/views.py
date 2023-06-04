@@ -411,12 +411,13 @@ def period_check(request):
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
 
+        id = request.POST.get('id', '')
         record_name = request.POST.get('recordname', '')
         allow_fids = request.POST.getlist('allow_fid')
 
         # Insert the data into the allow_friend table
-        query = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
-        values = [(record_name, allow_fid) for allow_fid in allow_fids]
+        query = "INSERT INTO allow_friend (id, record_name, allow_fid) VALUES (%s %s, %s)"
+        values = [(id, record_name, allow_fid) for allow_fid in allow_fids]
         cursor.executemany(query, values)
 
         # Commit the changes and close the connection

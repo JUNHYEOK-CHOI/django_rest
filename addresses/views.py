@@ -343,15 +343,58 @@ def history_RT(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        user_id = request.POST.get('userid', '')
-        user_name = ""
+        user_id = request.POST.get('userid', '')  # 사용자 ID
 
-        for i in range(0, Addresses.user_num):
-            if Addresses.user_list[i][0] == user_id:
-                user_name = Addresses.user_list[i][2]
-                break
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
 
-        return JsonResponse({'code': user_name, 'msg': Addresses.history_RT_num}, status=200)
+        # MySQL에서 사용자의 이름 조회
+        name_query = "SELECT name FROM user WHERE id = %s"
+        name_values = (user_id,)
+        cursor.execute(name_query, name_values)
+        name = cursor.fetchone()[0]  # 사용자 이름 조회
+
+        # MySQL에서 alive가 'Y'인 record_name에 해당하는 longitude와 latitude 조회
+        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s AND alive = 'Y'"
+        cursor.execute(history_query)
+        longitude_latitude = cursor.fetchall()  # record_name에 해당하는 longitude와 latitude 조회
+
+        longitude_list = []
+        latitude_list = []
+
+        for row in longitude_latitude:
+            longitude_list.append(row[0])  # longitude 값을 리스트에 추가
+            latitude_list.append(row[1])  # latitude 값을 리스트에 추가
+
+        print(longitude_list)
+        print(latitude_list)
+
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list}, status=200)
+
+
+@csrf_exempt
+def update_alive_status(request):
+    if request.method == 'POST':
+        print("리퀘스트 로그" + str(request.body))
+
+        user_id = request.POST.get('userid', '')  # 사용자 ID
+
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+
+        # alive 값을 'N'으로 업데이트하는 쿼리 실행
+        update_query = "UPDATE user_history SET alive = 'N' WHERE id = %s AND alive = 'Y'"
+        update_values = (user_id,)
+        cursor.execute(update_query, update_values)
+
+        # Commit the changes and close the connection
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
 
 
 @csrf_exempt

@@ -18,6 +18,7 @@ urlpatterns = [
     path('period_check/', views.period_check),
     path('period_check2/', views.period_check2),
     path('friend_list_delete/', views.friend_delete),
+    path('logout/', views.update_alive_status),
     path('get_profile/', views.get_profile),
     path('', addresses_views.index, name="index"),
     path('admin/', admin.site.urls),

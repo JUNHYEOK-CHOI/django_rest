@@ -355,24 +355,24 @@ def history_RT(request):
         cursor.execute(name_query, name_values)
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
-        # MySQL에서 record_name에 해당하는 longitude와 latitude 조회
+        # MySQL에서 record_name에 해당하는 longitude, latitude, time 조회
         history_query = "SELECT longitude, latitude, time FROM user_history WHERE record_name = %s AND alive = 'Y' ORDER BY history_id ASC LIMIT 1"
         cursor.execute(history_query)
         longitude_latitude_time = cursor.fetchone()  # record_name에 해당하는 longitude, latitude, time 조회
 
         longitude_list = []
         latitude_list = []
-        time = None
+        record_time = None
 
         if longitude_latitude_time:
             longitude_list.append(longitude_latitude_time[0])  # longitude 값을 리스트에 추가
             latitude_list.append(longitude_latitude_time[1])  # latitude 값을 리스트에 추가
-            time = longitude_latitude_time[2]  # time 값을 저장
+            record_time = longitude_latitude_time[2]  # time 값을 저장
 
         print(longitude_list)
         print(latitude_list)
 
-        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': time},
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': record_time},
                             status=200)
 
 

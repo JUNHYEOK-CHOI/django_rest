@@ -442,7 +442,7 @@ def period_check2(request):
         period = request.POST.get('period', '')
 
         # Insert the location data into the user_history table
-        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
+        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period, alive) VALUES (%s, %s, %s, %s, %s, 'Y')"
 
         values = (id, longitude, latitude, record_name, period)
 

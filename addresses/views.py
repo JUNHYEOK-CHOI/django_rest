@@ -386,7 +386,7 @@ def period_check(request):
         conn.commit()
         cursor.close()
         conn.close()
-        return JsonResponse({'code': '0000', 'num': '성공입니다.'}, status=200)
+        return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
 
 
 

@@ -364,19 +364,28 @@ def period_check(request):
         cursor = conn.cursor()
 
         id = request.POST.get('id', '')
-        longitude = request.POST.get('period', '')
-        latitude = request.POST.get('check', '')
+        longitude = request.POST.get('longitude', '')
+        latitude = request.POST.get('latitude', '')
+        record_name = request.POST.get('recordname', '')
+        period = request.POST.get('period', '')
+        allowfid = request.POST.getlist('allowfid')
 
         # Insert the location data into the user_history table
-        query = "INSERT INTO user_history (id, longitude, latitude) VALUES (%s, %s, %s)"
-        values = (id, longitude, latitude)
-        cursor.execute(query, values)
+        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
+        query2 = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
+
+        values = (id, longitude, latitude, record_name, period)
+        values += [(record_name, allow_fid) for allow_fid in allowfid]
+
+        cursor.executemany(query, values)
+        cursor.executemany(query2, values[1:])
 
         # Commit the changes and close the connection
         conn.commit()
         cursor.close()
         conn.close()
         return JsonResponse({'code': '0000', 'num': '성공입니다.'}, status=200)
+
 
 
 @csrf_exempt

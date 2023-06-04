@@ -306,7 +306,7 @@ def history_list3(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        id = request.POST.get('userid', '')  # 사용자 ID
+        user_id = request.POST.get('userid', '')  # 사용자 ID
         record_name = request.POST.get('recordname', '')  # 사용자 record 정보
 
         # MySQL 데이터베이스 연결
@@ -315,22 +315,17 @@ def history_list3(request):
 
         # MySQL에서 사용자의 이름 조회
         name_query = "SELECT name FROM user WHERE id = %s"
-        name_values = (id,)
+        name_values = (user_id,)
         cursor.execute(name_query, name_values)
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
-        # MySQL에서 record_name에 해당하는 longitude와 latitude 조회
-        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s"
+        # MySQL에서 record_name에 해당하는 첫 번째 longitude와 latitude 조회
+        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s LIMIT 1"
         history_values = (record_name,)
         cursor.execute(history_query, history_values)
-        history_data = cursor.fetchall()  # record_name에 해당하는 longitude와 latitude 조회
+        longitude, latitude = cursor.fetchone()  # record_name에 해당하는 첫 번째 longitude와 latitude 조회
 
-        # longitude와 latitude를 배열로 변환
-        longitude_latitude = [{'longitude': row[0], 'latitude': row[1]} for row in history_data]
-
-        print(longitude_latitude)
-
-        return JsonResponse({'code': name, 'msg': longitude_latitude}, status=200)
+        return JsonResponse({'name': name, 'longitude': longitude, 'latitude': latitude}, status=200)
 
 
 @csrf_exempt

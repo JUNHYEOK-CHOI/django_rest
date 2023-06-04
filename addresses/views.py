@@ -377,10 +377,10 @@ def period_check(request):
         query2 = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
 
         values = [(id, longitude, latitude, record_name, period)]
-        values += [(record_name, allow_fid) for allow_fid in allowfid]
+        allow_fid_values = [(record_name, fid) for fid in allowfid]
 
         cursor.executemany(query, values)
-        cursor.executemany(query2, values[1:])
+        cursor.executemany(query2, allow_fid_values)
 
         # Commit the changes and close the connection
         conn.commit()

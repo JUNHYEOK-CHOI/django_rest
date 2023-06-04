@@ -319,16 +319,20 @@ def history_list3(request):
         cursor.execute(name_query, name_values)
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
-        # MySQL에서 record_name에 해당하는 첫 번째 longitude와 latitude 조회
-        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s LIMIT 1"
+        # MySQL에서 record_name에 해당하는 longitude와 latitude 조회
+        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s"
         history_values = (record_name,)
         cursor.execute(history_query, history_values)
-        longitude, latitude = cursor.fetchone()  # record_name에 해당하는 첫 번째 longitude와 latitude 조회
+        longitude_latitude = cursor.fetchall()  # record_name에 해당하는 longitude와 latitude 조회
 
-        print(longitude)
-        print(latitude)
+        longitude_list = []
+        latitude_list = []
 
-        return JsonResponse({'name': name, 'longitude': longitude, 'latitude': latitude}, status=200)
+        for row in longitude_latitude:
+            longitude_list.append(row[0])  # longitude 값을 리스트에 추가
+            latitude_list.append(row[1])  # latitude 값을 리스트에 추가
+
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list}, status=200)
 
 
 @csrf_exempt

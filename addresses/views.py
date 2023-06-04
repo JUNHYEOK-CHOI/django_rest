@@ -325,6 +325,9 @@ def history_list3(request):
         cursor.execute(history_query, history_values)
         longitude, latitude = cursor.fetchone()  # record_name에 해당하는 첫 번째 longitude와 latitude 조회
 
+        print(longitude)
+        print(latitude)
+
         return JsonResponse({'name': name, 'longitude': longitude, 'latitude': latitude}, status=200)
 
 

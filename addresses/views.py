@@ -370,6 +370,8 @@ def period_check(request):
         period = request.POST.get('period', '')
         allowfid = request.POST.getlist('allowfid')
 
+        print(allowfid)
+
         # Insert the location data into the user_history table
         query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
         query2 = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
@@ -379,8 +381,6 @@ def period_check(request):
 
         cursor.executemany(query, values)
         cursor.executemany(query2, values[1:])
-
-        print(values)
 
         # Commit the changes and close the connection
         conn.commit()

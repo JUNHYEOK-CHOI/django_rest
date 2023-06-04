@@ -332,6 +332,9 @@ def history_list3(request):
             longitude_list.append(row[0])  # longitude 값을 리스트에 추가
             latitude_list.append(row[1])  # latitude 값을 리스트에 추가
 
+        print(longitude_list)
+        print(latitude_list)
+
         return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list}, status=200)
 
 

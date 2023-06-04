@@ -363,7 +363,7 @@ def period_check(request):
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
 
-        record_name = request.POST.get('record_name', '')
+        record_name = request.POST.get('recordname', '')
         allow_fids = request.POST.getlist('allow_fid')
 
         # Insert the data into the allow_friend table

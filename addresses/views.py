@@ -376,7 +376,7 @@ def period_check(request):
         query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
         query2 = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
 
-        values = (id, longitude, latitude, record_name, period)
+        values = [(id, longitude, latitude, record_name, period)]
         values += [(record_name, allow_fid) for allow_fid in allowfid]
 
         cursor.executemany(query, values)

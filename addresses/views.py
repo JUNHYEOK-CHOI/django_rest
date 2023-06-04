@@ -359,6 +359,8 @@ def history_RT(request):
         history_query = "SELECT longitude, latitude, time FROM user_history WHERE alive = 'Y' ORDER BY history_id ASC LIMIT 1"
         longitude_latitude_time = cursor.fetchone()  # record_name에 해당하는 longitude, latitude, time 조회
 
+        print(longitude_latitude_time)
+
         longitude_list = []
         latitude_list = []
         record_time = None

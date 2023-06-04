@@ -328,6 +328,8 @@ def history_list3(request):
         # longitude와 latitude를 배열로 변환
         longitude_latitude = [{'longitude': row[0], 'latitude': row[1]} for row in history_data]
 
+        print(longitude_latitude)
+
         return JsonResponse({'code': name, 'msg': longitude_latitude}, status=200)
 
 

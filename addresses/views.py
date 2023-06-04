@@ -398,7 +398,7 @@ def period_check2(request):
 
         values = (id, longitude, latitude, record_name, period)
 
-        cursor.executemany(query, values)
+        cursor.execute(query, values)
 
         # Commit the changes and close the connection
         conn.commit()

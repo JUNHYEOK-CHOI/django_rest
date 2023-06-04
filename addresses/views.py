@@ -380,6 +380,8 @@ def period_check(request):
         cursor.executemany(query, values)
         cursor.executemany(query2, values[1:])
 
+        print(values)
+
         # Commit the changes and close the connection
         conn.commit()
         cursor.close()

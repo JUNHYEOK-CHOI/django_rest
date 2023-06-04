@@ -363,30 +363,48 @@ def period_check(request):
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor()
 
-        id = request.POST.get('id', '')
-        longitude = request.POST.get('longitude', '')
-        latitude = request.POST.get('latitude', '')
-        record_name = request.POST.get('recordname', '')
-        period = request.POST.get('period', '')
-        allowfid = request.POST.getlist('allowfid')
+        record_name = request.POST.get('record_name', '')
+        allow_fids = request.POST.getlist('allow_fid')
 
-        print(allowfid)
-
-        # Insert the location data into the user_history table
-        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
-        query2 = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
-
-        values = [(id, longitude, latitude, record_name, period)]
-        allow_fid_values = [(record_name, fid) for fid in allowfid]
-
+        # Insert the data into the allow_friend table
+        query = "INSERT INTO allow_friend (record_name, allow_fid) VALUES (%s, %s)"
+        values = [(record_name, allow_fid) for allow_fid in allow_fids]
         cursor.executemany(query, values)
-        cursor.executemany(query2, allow_fid_values)
 
         # Commit the changes and close the connection
         conn.commit()
         cursor.close()
         conn.close()
-        return JsonResponse({'code': '0000', 'msg': '성공입니다.'}, status=200)
+        return JsonResponse({'code': '0000', 'num': '성공입니다.'}, status=200)
+
+
+@csrf_exempt
+def period_check2(request):
+    if request.method == 'POST':
+        print("리퀘스트 로그" + str(request.body))
+
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+
+        id = request.POST.get('id', '')
+        longitude = request.POST.get('period', '')
+        latitude = request.POST.get('check', '')
+        record_name = request.POST.get('recordname', '')
+        period = request.POST.get('period', '')
+
+        # Insert the location data into the user_history table
+        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period) VALUES (%s, %s, %s, %s, %s)"
+
+        values = (id, longitude, latitude, record_name, period)
+
+        cursor.executemany(query, values)
+
+        # Commit the changes and close the connection
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return JsonResponse({'code': '0000', 'num': '성공입니다.'}, status=200)
 
 
 

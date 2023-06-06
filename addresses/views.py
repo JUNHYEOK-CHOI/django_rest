@@ -118,8 +118,9 @@ def show_friend_list(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
-        name_list = []  # name 을 저장
+        name_list = []  # name을 저장
         id_list = []  # id를 저장
+        alive_list = []  # alive 상태를 저장
         id_num = 0
 
         # MySQL 데이터베이스 연결
@@ -148,6 +149,17 @@ def show_friend_list(request):
                 name = friend_info[0]  # code name / code2 id
                 name_list.append(name)
                 id_list.append(friend_id)
+
+                # friend_id의 alive 상태 조회
+                history_query = f"SELECT alive FROM user_history WHERE id = '{friend_id}'"
+                cursor.execute(history_query)
+                history_results = cursor.fetchall()
+
+                if any(result[0] == 'Y' for result in history_results):
+                    alive_list.append('Y')
+                else:
+                    alive_list.append('N')
+
                 id_num += 1
 
         # 연결 종료
@@ -156,9 +168,10 @@ def show_friend_list(request):
 
         print(name_list)
         print(id_list)
+        print(alive_list)
         print(id_num)
 
-        return JsonResponse({'code': name_list, 'code2': id_list, 'num': id_num}, status=200)
+        return JsonResponse({'code': name_list, 'code2': id_list, 'code3': alive_list, 'num': id_num}, status=200)
 
 
 @csrf_exempt
@@ -441,7 +454,7 @@ def period_check2(request):
         time = request.POST.get('time', '')
 
         # Insert the location data into the user_history table
-        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period, time) VALUES (%s, %s, %s, %s, %s, %s)"
+        query = "INSERT INTO user_history (id, longitude, latitude, record_name, period, time, alive) VALUES (%s, %s, %s, %s, %s, %s, 'Y')"
 
         values = (id, longitude, latitude, record_name, period, time)
 

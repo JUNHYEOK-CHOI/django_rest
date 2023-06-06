@@ -355,24 +355,24 @@ def history_RT(request):
         cursor.execute(name_query, name_values)
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
-        # MySQL에서 record_name에 해당하는 longitude, latitude, time 조회
-        history_query = "SELECT longitude, latitude, time FROM user_history WHERE alive = 'Y' ORDER BY history_id ASC LIMIT 1"
-        cursor.execute(history_query)
-        longitude_latitude_time = cursor.fetchone()  # record_name에 해당하는 longitude, latitude, time 조회
+        # MySQL에서 alive가 'Y'인 레코드 중에서 가장 작은 history_id의 time을 조회
+        min_time_query = "SELECT MIN(time) FROM user_history WHERE id = %s AND alive = 'Y'"
+        cursor.execute(min_time_query, (user_id,))
+        record_time = cursor.fetchone()[0]
 
-        print(longitude_latitude_time)
+        # MySQL에서 alive가 'Y'인 레코드의 longitude와 latitude 조회
+        history_query = "SELECT longitude, latitude FROM user_history WHERE id = %s AND alive = 'Y'"
+        cursor.execute(history_query, (user_id,))
+        results = cursor.fetchall()
 
         longitude_list = []
         latitude_list = []
-        record_time = None
 
-        if longitude_latitude_time:
-            longitude_list.append(longitude_latitude_time[0])  # longitude 값을 리스트에 추가
-            latitude_list.append(longitude_latitude_time[1])  # latitude 값을 리스트에 추가
-            record_time = longitude_latitude_time[2]  # time 값을 저장
+        for result in results:
+            longitude_list.append(result[0])
+            latitude_list.append(result[1])
 
         print(longitude_list)
-        print(latitude_list)
 
         return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list},
                             status=200)

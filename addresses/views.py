@@ -558,6 +558,8 @@ def get_end(request):
             recoed_name_list.append(result[0])
             time_list.append(result[1])
 
+        record_name_list_temp = ""
+
         if recoed_name_list:
             record_name_list_temp = recoed_name_list[0]
 

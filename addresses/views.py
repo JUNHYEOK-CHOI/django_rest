@@ -524,3 +524,45 @@ def get_profile(request):
         conn.close()
 
         return JsonResponse({'name': name, 'id': id}, status=200)
+
+
+@csrf_exempt
+def get_end(request):
+    if request.method == 'POST':
+        print("리퀘스트 로그" + str(request.body))
+
+        id = request.POST.get('userid', '')
+        name = ""
+
+        # MySQL 데이터베이스 연결
+        conn = mysql.connector.connect(**config)
+        cursor = conn.cursor()
+
+        # SELECT 쿼리 실행
+        query = "SELECT name FROM user WHERE id = %s"
+        cursor.execute(query, (id,))
+        result = cursor.fetchone()
+
+        if result:
+            name = result[0]
+
+        # MySQL에서 alive가 'Y'인 레코드의 longitude, latitude, time 조회
+        history_query = "SELECT record_name, time FROM user_history WHERE id = %s AND alive = 'Y'"
+        cursor.execute(history_query, (id,))
+        results = cursor.fetchall()
+
+        recoed_name_list = []
+        time_list = []
+
+        for result in results:
+            recoed_name_list.append(result[0])
+            time_list.append(result[1])
+
+        if recoed_name_list:
+            record_name_list_temp = recoed_name_list[0]
+
+        # 연결 종료
+        cursor.close()
+        conn.close()
+
+        return JsonResponse({'name': name, 'time': time_list, 'trip': record_name_list_temp}, status=200)

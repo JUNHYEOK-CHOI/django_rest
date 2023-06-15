@@ -20,6 +20,7 @@ urlpatterns = [
     path('friend_list_delete/', views.friend_delete),
     path('logout/', views.update_alive_status),
     path('get_profile/', views.get_profile),
+    path('get_end/', views.get_end),
     path('', addresses_views.index, name="index"),
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework'))

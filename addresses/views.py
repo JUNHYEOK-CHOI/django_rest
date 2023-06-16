@@ -304,6 +304,13 @@ def history_list2(request):  # 각 친구별 여행 목록
         cursor.execute(query, values)
         records = cursor.fetchall()  # 사용자의 레코드 목록 조회
 
+        query2 = f"SELECT name FROM user WHERE id = '{user_id}'"
+        cursor.execute(query2)
+        friend_info = cursor.fetchone()
+
+        if friend_info:
+            name = friend_info[0]  # code name / code2 id
+
         # 유일한 레코드 이름 개수
         num_records = len(records)
 
@@ -311,7 +318,7 @@ def history_list2(request):  # 각 친구별 여행 목록
         record_names = [record[0] for record in records]
         print("레코드 목록:", record_names)
 
-        return JsonResponse({'code': user_id, 'num': num_records, 'records': record_names}, status=200)
+        return JsonResponse({'code': user_id, 'num': num_records, 'records': record_names, 'name': name}, status=200)
 
 
 @csrf_exempt

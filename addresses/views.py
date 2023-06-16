@@ -401,6 +401,7 @@ def history_RT(request):
             results2 = cursor.fetchall()
 
             print(record_nameF)
+            print(results2)
             i = 0
             for i in range(len(results2)):
                 if (real_id == results2[i]):

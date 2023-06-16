@@ -363,6 +363,7 @@ def history_RT(request):
     if request.method == 'POST':
         print("리퀘스트 로그" + str(request.body))
 
+        real_id = request.POST.get('ID', '')
         user_id = request.POST.get('userid', '')  # 사용자 ID
 
         # MySQL 데이터베이스 연결
@@ -376,22 +377,37 @@ def history_RT(request):
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
         # MySQL에서 alive가 'Y'인 레코드의 longitude, latitude, time 조회
-        history_query = "SELECT longitude, latitude, time FROM user_history WHERE id = %s AND alive = 'Y'"
+        history_query = "SELECT longitude, latitude, time, record_name FROM user_history WHERE id = %s AND alive = 'Y'"
         cursor.execute(history_query, (user_id,))
         results = cursor.fetchall()
 
         longitude_list = []
         latitude_list = []
         time_list = []
+        record_name = []
 
         for result in results:
             longitude_list.append(result[0])
             latitude_list.append(result[1])
             time_list.append(result[2])
+            record_name.append(result[3])
+
+        if(record_name):
+            record_nameF = record_name[0]
+
+        new_query = "SELECT allow_fid FROM allow_friend WHERE record_name = %s AND id = %s"
+        cursor.execute(new_query, (record_nameF, user_id,))
+        results2 = cursor.fetchall()
+
+        FLAG = 0
+        i = 0
+        for i in range(len(results2)):
+            if(real_id == results2[i]):
+                FLAG = 1
 
         print(time_list)
 
-        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': time_list},
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': time_list, 'FLAG': FLAG},
                             status=200)
 
 

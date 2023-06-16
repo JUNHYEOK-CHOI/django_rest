@@ -400,6 +400,7 @@ def history_RT(request):
             cursor.execute(new_query, (record_nameF, user_id,))
             results2 = cursor.fetchall()
 
+            print(record_nameF)
             i = 0
             for i in range(len(results2)):
                 if (real_id == results2[i]):

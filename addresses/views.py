@@ -576,16 +576,20 @@ def get_end(request):
             name = result[0]
 
         # MySQL에서 alive가 'Y'인 레코드의 longitude, latitude, time 조회
-        history_query = "SELECT record_name, time FROM user_history WHERE id = %s AND alive = 'Y'"
+        history_query = "SELECT record_name, time, longitude, latitude FROM user_history WHERE id = %s AND alive = 'Y'"
         cursor.execute(history_query, (id,))
         results = cursor.fetchall()
 
         recoed_name_list = []
         time_list = []
+        longitude_list = []
+        latitude_list = []
 
         for result in results:
             recoed_name_list.append(result[0])
             time_list.append(result[1])
+            longitude_list.append(result[2])
+            latitude_list.append(result[3])
 
         record_name_list_temp = ""
 
@@ -596,4 +600,4 @@ def get_end(request):
         cursor.close()
         conn.close()
 
-        return JsonResponse({'name': name, 'time': time_list, 'trip': record_name_list_temp}, status=200)
+        return JsonResponse({'name': name, 'time': time_list, 'trip': record_name_list_temp, 'longitude_list': longitude_list, 'latitude_list': latitude_list}, status=200)

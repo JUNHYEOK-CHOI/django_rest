@@ -392,19 +392,18 @@ def history_RT(request):
             time_list.append(result[2])
             record_name.append(result[3])
 
+        FLAG = 0
 
         if record_name:
             record_nameF = record_name[0]
+            new_query = "SELECT allow_fid FROM allow_friend WHERE record_name = %s AND id = %s"
+            cursor.execute(new_query, (record_nameF, user_id,))
+            results2 = cursor.fetchall()
 
-        new_query = "SELECT allow_fid FROM allow_friend WHERE record_name = %s AND id = %s"
-        cursor.execute(new_query, (record_nameF, user_id,))
-        results2 = cursor.fetchall()
-
-        FLAG = 0
-        i = 0
-        for i in range(len(results2)):
-            if(real_id == results2[i]):
-                FLAG = 1
+            i = 0
+            for i in range(len(results2)):
+                if (real_id == results2[i]):
+                    FLAG = 1
 
         print(time_list)
 

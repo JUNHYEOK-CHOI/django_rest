@@ -406,6 +406,7 @@ def history_RT(request):
                     FLAG = 1
 
         print(time_list)
+        print(FLAG)
 
         return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'time': time_list, 'FLAG': FLAG},
                             status=200)

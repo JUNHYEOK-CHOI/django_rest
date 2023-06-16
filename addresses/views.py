@@ -1,3 +1,5 @@
+import math
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import render
@@ -347,6 +349,26 @@ def history_list3(request):
 
         longitude_list = []
         latitude_list = []
+        distance = 0  # 움직인 거리를 저장할 변수
+
+        # 이전 위치 정보
+        prev_lat = None
+        prev_lon = None
+
+        for row in longitude_latitude:
+            longitude = row[0]
+            latitude = row[1]
+
+            longitude_list.append(longitude)
+            latitude_list.append(latitude)
+
+            if prev_lat is not None and prev_lon is not None:
+                # 이전 위치와 현재 위치 사이의 거리 계산하여 누적
+                distance += calculate_distance(prev_lat, prev_lon, latitude, longitude)
+
+            # 현재 위치를 이전 위치로 설정
+            prev_lat = latitude
+            prev_lon = longitude
 
         for row in longitude_latitude:
             longitude_list.append(row[0])  # longitude 값을 리스트에 추가
@@ -354,8 +376,29 @@ def history_list3(request):
 
         print(longitude_list)
         print(latitude_list)
+        print(distance)
 
-        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list}, status=200)
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'distance': distance}, status=200)
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # 지구의 반경(단위: km)
+
+    # 각도를 라디안으로 변환
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    # 위도와 경도의 차이 계산
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+
+    # 하버사인 공식 계산
+    a = math.sin(dlat/2) * math.sin(dlat/2) + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon/2) * math.sin(dlon/2)
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+    distance = R * c
+
+    return distance
 
 
 @csrf_exempt

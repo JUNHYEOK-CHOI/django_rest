@@ -403,7 +403,7 @@ def history_RT(request):
             print(record_nameF)
             print(results2)
             i = 0
-            for i in range(len(results2)):
+            for i in range(results2):
                 if (real_id == results2[i]):
                     FLAG = 1
 

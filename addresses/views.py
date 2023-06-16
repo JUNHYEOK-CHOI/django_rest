@@ -392,7 +392,8 @@ def history_RT(request):
             time_list.append(result[2])
             record_name.append(result[3])
 
-        if(record_name):
+
+        if record_name:
             record_nameF = record_name[0]
 
         new_query = "SELECT allow_fid FROM allow_friend WHERE record_name = %s AND id = %s"

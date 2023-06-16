@@ -402,13 +402,12 @@ def history_RT(request):
 
             print(record_nameF)
             print(results2)
-            print(results2)
             i = 0
             for i in range(0, len(results2)):
                 print("1234")
                 print(real_id)
-                print(results2[i])
-                if (real_id == results2[i]):
+                print(results2[i][0])
+                if (real_id == results2[i][0]):
                     FLAG = 1
 
         print(time_list)

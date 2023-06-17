@@ -342,7 +342,7 @@ def history_list3(request):
         name = cursor.fetchone()[0]  # 사용자 이름 조회
 
         # MySQL에서 record_name에 해당하는 longitude와 latitude 조회
-        history_query = "SELECT longitude, latitude FROM user_history WHERE record_name = %s"
+        history_query = "SELECT longitude, latitude, time FROM user_history WHERE record_name = %s"
         history_values = (record_name,)
         cursor.execute(history_query, history_values)
         longitude_latitude = cursor.fetchall()  # record_name에 해당하는 longitude와 latitude 조회
@@ -350,6 +350,7 @@ def history_list3(request):
         longitude_list = []
         latitude_list = []
         distance = 0  # 움직인 거리를 저장할 변수
+        time_list = []
 
         # 이전 위치 정보
         prev_lat = None
@@ -371,14 +372,13 @@ def history_list3(request):
             prev_lon = longitude
 
         for row in longitude_latitude:
-            longitude_list.append(row[0])  # longitude 값을 리스트에 추가
-            latitude_list.append(row[1])  # latitude 값을 리스트에 추가
+            time_list.append(row[2])
 
         print(longitude_list)
         print(latitude_list)
         print(distance)
 
-        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'distance': distance}, status=200)
+        return JsonResponse({'name': name, 'longitude': longitude_list, 'latitude': latitude_list, 'distance': distance, 'time': time_list}, status=200)
 
 def calculate_distance(lat1, lon1, lat2, lon2):
     R = 6371  # 지구의 반경(단위: km)

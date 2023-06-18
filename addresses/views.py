@@ -301,33 +301,25 @@ def history_list2(request):  # 각 친구별 여행 목록
         user_id = request.POST.get('userid', '')  # 사용자 ID
         friend_id = request.POST.get('friendid', '')  # 친구 ID
 
-        # MySQL에서 친구의 유일한 레코드 이름 조회
+        # MySQL에서 내 id가 allow_fid로, 친구 id가 id로 되어있는 레코드의 record_name을 중복 없이 조회
         query = """
             SELECT DISTINCT record_name
-            FROM user_history
-            WHERE id = %s
-                AND record_name IN (
-                    SELECT DISTINCT record_name
-                    FROM user_history
-                    WHERE id = %s
-                        AND record_name IN (
-                            SELECT DISTINCT record_name
-                            FROM allow_friend
-                            WHERE id = %s
-                                AND allow_fid = %s
-                        )
-                )
+            FROM allow_friend
+            WHERE allow_fid = %s
+                AND id = %s
         """
-        values = (friend_id, friend_id, user_id, friend_id)
+        values = (user_id, friend_id)
         cursor.execute(query, values)
-        records = cursor.fetchall()  # 친구의 레코드 목록 조회
+        records = cursor.fetchall()  # 레코드 목록 조회
 
-        query2 = f"SELECT name FROM user WHERE id = '{friend_id}'"
-        cursor.execute(query2)
-        friend_info = cursor.fetchone()
+        # 친구의 이름 조회
+        query2 = "SELECT name FROM user WHERE id = %s"
+        values2 = (friend_id,)
+        cursor.execute(query2, values2)
+        friend_name = cursor.fetchone()
 
-        if friend_info:
-            name = friend_info[0]  # code name / code2 id
+        if friend_name:
+            name = friend_name[0]  # 친구의 이름
 
         # 유일한 레코드 이름 개수
         num_records = len(records)

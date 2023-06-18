@@ -299,15 +299,24 @@ def history_list2(request):  # 각 친구별 여행 목록
         cursor = conn.cursor()
 
         user_id = request.POST.get('userid', '')  # 사용자 ID
-        friend_id = request.POST.get('friendid', '')
+        friend_id = request.POST.get('friendid', '')  # 친구 ID
 
         # MySQL에서 사용자의 유일한 레코드 이름 조회
-        query = "SELECT DISTINCT record_name FROM user_history WHERE record_name IN (SELECT record_name FROM allow_friend WHERE (allow_fid = %s AND id = %s))"
-        values = (friend_id, user_id, )
+        query = """
+            SELECT DISTINCT record_name
+            FROM user_history
+            WHERE id = %s
+                AND record_name IN (
+                    SELECT DISTINCT record_name
+                    FROM user_history
+                    WHERE id = %s
+                )
+        """
+        values = (user_id, friend_id)
         cursor.execute(query, values)
         records = cursor.fetchall()  # 사용자의 레코드 목록 조회
 
-        query2 = f"SELECT name FROM user WHERE id = '{user_id}'"
+        query2 = f"SELECT name FROM user WHERE id = '{friend_id}'"
         cursor.execute(query2)
         friend_info = cursor.fetchone()
 
